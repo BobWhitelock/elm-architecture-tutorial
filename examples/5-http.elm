@@ -71,7 +71,11 @@ view model =
   div []
     [ h2 [] [text model.topic]
     , button [ onClick MorePlease ] [ text "More Please!" ]
-    , input [type' "text", value model.topic, onInput UpdateTopic] []
+    , select [onInput UpdateTopic]
+    [ (option [value "cats"] [text "Cats"])
+    , (option [value "dogs"] [text "Dogs"])
+    , (option [value "things"] [text "Things"])
+    ]
     , br [] []
     , img [src model.gifUrl] []
     , span [] [text model.message]
