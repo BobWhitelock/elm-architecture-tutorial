@@ -42,6 +42,8 @@ init =
 type Msg
   = Roll
   | NewFace (List Int)
+  | AddDie
+  | RemoveDie
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -52,6 +54,12 @@ update msg model =
 
     NewFace newFaces ->
       (Model (updateDice newFaces model.dice), Cmd.none)
+
+    AddDie ->
+      ({model | dice = Die 1 :: model.dice }, Cmd.none)
+
+    RemoveDie ->
+      ({model | dice = List.drop 1 model.dice}, Cmd.none)
 
 generateNewFaces : List Die -> Cmd Msg
 generateNewFaces dice =
@@ -83,6 +91,8 @@ view model =
   div []
     [ div [] (List.map showFace model.dice)
     , button [ onClick Roll ] [ text "Roll" ]
+    , button [ onClick AddDie ] [ text "Add Die" ]
+    , button [ onClick RemoveDie ] [ text "Remove Die" ]
     ]
 
 showFace : Die -> Html Msg
