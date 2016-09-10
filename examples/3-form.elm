@@ -1,7 +1,7 @@
 import Html exposing (..)
 import Html.App as Html
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 import String exposing (length)
 
 main =
@@ -21,13 +21,17 @@ type alias Model =
   , password : String
   , passwordAgain : String
   , age : String
+  , validation : (String, String)
   }
 
 
 model : Model
 model =
-  Model "" "" "" ""
+  Model "" "" "" "" initialValidation
 
+initialValidation : (String, String)
+initialValidation =
+  ("orange", "Unvalidated")
 
 
 -- UPDATE
@@ -38,22 +42,36 @@ type Msg
     | Password String
     | PasswordAgain String
     | Age String
+    | Validate
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
     Name name ->
-      { model | name = name }
+      { model | name = name, validation = initialValidation }
 
     Password password ->
-      { model | password = password }
+      { model | password = password, validation = initialValidation }
 
     PasswordAgain password ->
-      { model | passwordAgain = password }
+      { model | passwordAgain = password, validation = initialValidation }
 
     Age age ->
-      { model | age = age }
+      { model | age = age, validation = initialValidation }
 
+    Validate ->
+      { model | validation = validate model }
+
+validate : Model -> (String, String)
+validate model =
+  if model.password /= model.passwordAgain then
+    error  "Passwords do not match!"
+  else if length model.password < 8 then
+    error  "Password too short"
+  else if invalidAge model.age then
+    error "You can't be that old!"
+  else
+    ok
 
 
 -- VIEW
@@ -66,22 +84,15 @@ view model =
     , input [ type' "password", placeholder "Password", onInput Password ] []
     , input [ type' "password", placeholder "Re-enter Password", onInput PasswordAgain ] []
     , input [ type' "number", placeholder "Age", onInput Age ] []
+    , button [ onClick Validate ] [ text "Done" ]
     , viewValidation model
     ]
-
 
 viewValidation : Model -> Html msg
 viewValidation model =
   let
     (color, message) =
-      if model.password /= model.passwordAgain then
-        error  "Passwords do not match!"
-      else if length model.password < 8 then
-        error  "Password too short"
-      else if invalidAge model.age then
-        error "You can't be that old!"
-      else
-        ok
+      model.validation
   in
     div [ style [("color", color)] ] [ text message ]
 
