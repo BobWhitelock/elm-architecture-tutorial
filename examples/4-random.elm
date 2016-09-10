@@ -3,6 +3,7 @@ import Html.App as Html
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Random
+import List
 
 
 
@@ -20,13 +21,18 @@ main =
 
 
 type alias Model =
-  { dieFace : Int
+  {
+    dice: List Die
   }
 
+type alias Die =
+  {
+    face : Int
+  }
 
 init : (Model, Cmd Msg)
 init =
-  (Model 1, Cmd.none)
+  ({dice = [Die 1, Die 2]}, Cmd.none)
 
 
 
@@ -35,18 +41,29 @@ init =
 
 type Msg
   = Roll
-  | NewFace Int
+  | NewFace (List Int)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Roll ->
-      (model, Random.generate NewFace (Random.int 1 6))
+      (model, generateNewFaces model.dice)
 
-    NewFace newFace ->
-      (Model newFace, Cmd.none)
+    NewFace newFaces ->
+      (Model (updateDice newFaces model.dice), Cmd.none)
 
+generateNewFaces : List Die -> Cmd Msg
+generateNewFaces dice =
+  Random.generate NewFace (Random.list (List.length dice) (Random.int 1 6))
+
+updateDice : List Int -> List Die -> List Die
+updateDice newFaces dice =
+  List.map2 updateDie newFaces dice
+
+updateDie : Int -> Die -> Die
+updateDie newFace die =
+  Die newFace
 
 
 -- SUBSCRIPTIONS
@@ -64,13 +81,13 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   div []
-    [ showFace model.dieFace
+    [ div [] (List.map showFace model.dice)
     , button [ onClick Roll ] [ text "Roll" ]
     ]
 
-showFace : Int -> Html Msg
-showFace dieFace =
-  case dieFace of
+showFace : Die -> Html Msg
+showFace die =
+  case die.face of
     1 ->
       img [ src "http://etc.usf.edu/clipart/42100/42158/die_01_42158_sm.gif" ] []
     2 ->
@@ -85,4 +102,4 @@ showFace dieFace =
       img [ src "http://etc.usf.edu/clipart/42100/42164/die_06_42164_sm.gif" ] []
     _ ->
       -- Should never happen.
-      h1 [] [ text (toString dieFace) ]
+      h1 [] [ text (toString die.face) ]
