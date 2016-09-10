@@ -53,13 +53,17 @@ update msg model =
       (model, generateNewFaces model.dice)
 
     NewFace newFaces ->
-      (Model (updateDice newFaces model.dice), Cmd.none)
+      updateModel (Model (updateDice newFaces model.dice))
 
     AddDie ->
-      ({model | dice = Die 1 :: model.dice }, Cmd.none)
+      updateModel {model | dice = Die 1 :: model.dice }
 
     RemoveDie ->
-      ({model | dice = List.drop 1 model.dice}, Cmd.none)
+      updateModel {model | dice = List.drop 1 model.dice}
+
+updateModel : Model -> (Model, Cmd Msg)
+updateModel model =
+  (model, Cmd.none)
 
 generateNewFaces : List Die -> Cmd Msg
 generateNewFaces dice =
