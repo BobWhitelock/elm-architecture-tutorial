@@ -43,6 +43,7 @@ type Msg
   = MorePlease
   | FetchSucceed String
   | FetchFail Http.Error
+  | UpdateTopic String
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -57,6 +58,9 @@ update msg model =
     FetchFail _ ->
       ({model | message = "We failed to get another gif..."}, Cmd.none)
 
+    UpdateTopic topic ->
+      ({model | topic = topic}, Cmd.none)
+
 
 
 -- VIEW
@@ -67,6 +71,7 @@ view model =
   div []
     [ h2 [] [text model.topic]
     , button [ onClick MorePlease ] [ text "More Please!" ]
+    , input [type' "text", value model.topic, onInput UpdateTopic] []
     , br [] []
     , img [src model.gifUrl] []
     , span [] [text model.message]
